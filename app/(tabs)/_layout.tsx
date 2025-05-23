@@ -18,13 +18,12 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          backgroundColor: "#fff", // fundo branco
+          borderTopWidth: 0.5,
+          borderTopColor: "#eee",
+          height: 60,
+        },
       }}
     >
       <Tabs.Screen
@@ -32,7 +31,7 @@ export default function TabLayout() {
         options={{
           title: "Feed",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="list.bullet" color={color} />
+            <IconSymbol size={28} name="doc.text" color={color} />
           ),
         }}
       />
@@ -56,7 +55,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <IconSymbol
               size={28}
-              name="person.crop.circle.fill"
+              name="person.fill" // Ícone de pessoa
               color={color}
             />
           ),

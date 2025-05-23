@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, Alert, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { salvarDenuncia } from '../../db/denunciaDB';
+import { useRouter } from 'expo-router';
 
 const motivos = [
   'Ameaça',
@@ -17,9 +19,44 @@ const DenunciarScreen = () => {
   const [descricao, setDescricao] = useState('');
   const [agressor, setAgressor] = useState('');
   const [motivoDropdown, setMotivoDropdown] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const router = useRouter();
+
+  const handleEnviar = async () => {
+    if (!motivo || !descricao) {
+      Alert.alert('Atenção', 'Preencha o motivo e a descrição.');
+      return;
+    }
+    try {
+      await salvarDenuncia({
+        nome: identificar ? nome : '',
+        identificar,
+        motivo,
+        descricao,
+        agressor,
+        createdAt: new Date().toISOString(),
+      });
+      setShowPopup(true);
+      setNome('');
+      setMotivo('');
+      setDescricao('');
+      setAgressor('');
+      setIdentificar(true);
+    } catch (e) {
+      Alert.alert('Erro', 'Não foi possível salvar a denúncia.');
+    }
+  };
 
   return (
     <View style={styles.container}>
+      {/* Popup de confirmação */}
+      {showPopup && (
+        <View style={styles.popup}>
+          <Text style={styles.popupText}>Denúncia enviada com sucesso!</Text>
+        </View>
+      )}
+
       {/* Header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
         <TouchableOpacity>
@@ -101,7 +138,7 @@ const DenunciarScreen = () => {
       />
 
       {/* Botão Enviar */}
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleEnviar}>
         <Text style={styles.buttonText}>Enviar</Text>
       </TouchableOpacity>
     </View>
@@ -114,6 +151,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingTop: Platform.OS === 'ios' ? 56 : 32,
     paddingHorizontal: 24,
+  },
+  popup: {
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
+    marginHorizontal: 24,
+    backgroundColor: '#A03A5E',
+    padding: 16,
+    borderRadius: 12,
+    zIndex: 100,
+    alignItems: 'center',
+    elevation: 10,
+  },
+  popupText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   input: {
     borderWidth: 1,

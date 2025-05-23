@@ -7,9 +7,9 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { UserProvider } from '../contexts/UserContext'; // adicione este import
+import { UserProvider } from '../contexts/UserContext';
+import { initDb } from '../db/userDB'; // ADICIONE ESTA LINHA
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -19,6 +19,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    initDb(); // INICIALIZA O BANCO
     if (loaded) {
       SplashScreen.hideAsync();
     }

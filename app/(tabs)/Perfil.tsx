@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../contexts/UserContext';
+import { registerUser, loginUser } from '../../db/userDB';
 
 const options = [
   {
@@ -14,29 +15,60 @@ const options = [
 const PerfilScreen = () => {
   const { user, setUser } = useUser();
 
-  // Estados para modal de login
+  // Estados para modal de login/cadastro
   const [loginVisible, setLoginVisible] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
+  const [nome, setNome] = useState('');
   const [loginError, setLoginError] = useState('');
 
   // Estado para modal de desconectar
   const [logoutVisible, setLogoutVisible] = useState(false);
 
+  // NOVO ESTADO: Estado para modal de privacidade e segurança
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+
   // Função de login
-  const handleLogin = () => {
-    if (login === 'admin' && senha === 'admin') {
-      setUser({
-        name: 'Humberto',
-        username: '@humbertomatheus',
+  const handleLogin = async () => {
+    try {
+      const userDb = await loginUser(login, senha);
+      if (userDb) {
+        setUser({
+          name: userDb.name,
+          username: userDb.username,
+          avatarColor: userDb.avatarColor,
+        });
+        setLoginVisible(false);
+        setLogin('');
+        setSenha('');
+        setNome('');
+        setLoginError('');
+      } else {
+        setLoginError('Usuário ou senha inválidos');
+      }
+    } catch (e) {
+      setLoginError('Erro ao acessar o banco');
+    }
+  };
+
+  // Função de cadastro
+  const handleRegister = async () => {
+    if (!login || !senha || !nome) {
+      setLoginError('Preencha todos os campos');
+      return;
+    }
+    try {
+      await registerUser({
+        username: login,
+        password: senha,
+        name: nome,
         avatarColor: '#C96A8C',
       });
-      setLoginVisible(false);
-      setLogin('');
-      setSenha('');
-      setLoginError('');
-    } else {
-      setLoginError('Usuário ou senha inválidos');
+      setLoginError('Cadastro realizado! Faça login.');
+      setIsRegister(false);
+    } catch (e) {
+      setLoginError('Erro ao cadastrar. Usuário já existe?');
     }
   };
 
@@ -53,19 +85,23 @@ const PerfilScreen = () => {
         </View>
         <View style={styles.divider} />
         <View style={styles.options}>
-          <TouchableOpacity style={styles.optionRow}>
+          <TouchableOpacity style={styles.optionRow} onPress={() => setPrivacyModalVisible(true)}>
             <Text style={styles.optionText}>Privacidade e Segurança</Text>
             <Ionicons name="chevron-forward" size={20} color="#B0B0B0" />
           </TouchableOpacity>
         </View>
         <TouchableOpacity
           style={styles.loginButton}
-          onPress={() => setLoginVisible(true)}
+          onPress={() => {
+            setLoginVisible(true);
+            setIsRegister(false);
+            setLoginError('');
+          }}
         >
           <Text style={styles.loginButtonText}>Conectar ou registrar-se</Text>
         </TouchableOpacity>
 
-        {/* Modal de Login */}
+        {/* Modal de Login/Cadastro */}
         <Modal
           visible={loginVisible}
           transparent
@@ -74,7 +110,15 @@ const PerfilScreen = () => {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Entrar</Text>
+              <Text style={styles.modalTitle}>{isRegister ? 'Cadastrar' : 'Entrar'}</Text>
+              {isRegister && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nome"
+                  value={nome}
+                  onChangeText={setNome}
+                />
+              )}
               <TextInput
                 style={styles.input}
                 placeholder="Usuário"
@@ -97,6 +141,7 @@ const PerfilScreen = () => {
                     setLoginVisible(false);
                     setLogin('');
                     setSenha('');
+                    setNome('');
                     setLoginError('');
                   }}
                 >
@@ -104,11 +149,57 @@ const PerfilScreen = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalButton, { backgroundColor: '#A03A5E' }]}
-                  onPress={handleLogin}
+                  onPress={isRegister ? handleRegister : handleLogin}
                 >
-                  <Text style={styles.modalButtonText}>Entrar</Text>
+                  <Text style={styles.modalButtonText}>{isRegister ? 'Cadastrar' : 'Entrar'}</Text>
                 </TouchableOpacity>
               </View>
+              <TouchableOpacity
+                style={{ marginTop: 16, alignSelf: 'center' }}
+                onPress={() => {
+                  setIsRegister(!isRegister);
+                  setLoginError('');
+                }}
+              >
+                <Text style={{ color: '#A03A5E', fontWeight: 'bold' }}>
+                  {isRegister ? 'Já tem conta? Entrar' : 'Não tem conta? Cadastre-se'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* NOVO MODAL: Privacidade e Segurança para usuário deslogado */}
+        <Modal
+          visible={privacyModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setPrivacyModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.privacyModalContent}>
+              <Text style={styles.modalTitle}>Privacidade e Segurança</Text>
+              <Text style={styles.privacyText}>
+                Nós levamos a sua privacidade a sério. Aqui estão algumas informações importantes sobre como seus dados são tratados:
+              </Text>
+              <Text style={styles.privacyText}>
+                - **Coleta de Dados:** Coletamos apenas os dados essenciais para o funcionamento do aplicativo, como seu nome de usuário e informações de login.
+              </Text>
+              <Text style={styles.privacyText}>
+                - **Uso dos Dados:** Seus dados são usados exclusivamente para personalizar sua experiência e garantir a segurança da sua conta. Nunca compartilhamos seus dados com terceiros sem seu consentimento explícito.
+              </Text>
+              <Text style={styles.privacyText}>
+                - **Segurança:** Empregamos medidas de segurança avançadas para proteger suas informações contra acessos não autorizados. Suas senhas são armazenadas de forma criptografada.
+              </Text>
+              <Text style={styles.privacyText}>
+                - **Controle:** Você tem total controle sobre suas informações. Acesse as configurações da sua conta para gerenciar suas preferências de privacidade.
+              </Text>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: '#A03A5E', marginTop: 20 }]}
+                onPress={() => setPrivacyModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Entendi</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -133,7 +224,15 @@ const PerfilScreen = () => {
       <View style={styles.divider} />
       <View style={styles.options}>
         {options.map((option) => (
-          <TouchableOpacity style={styles.optionRow} key={option.key}>
+          <TouchableOpacity
+            style={styles.optionRow}
+            key={option.key}
+            onPress={() => {
+              if (option.key === 'privacidade') {
+                setPrivacyModalVisible(true);
+              }
+            }}
+          >
             <Text style={styles.optionText}>{option.label}</Text>
             <Ionicons name="chevron-forward" size={20} color="#B0B0B0" />
           </TouchableOpacity>
@@ -177,6 +276,41 @@ const PerfilScreen = () => {
                 <Text style={styles.modalButtonText}>Desconectar</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* NOVO MODAL: Privacidade e Segurança para usuário logado */}
+      <Modal
+        visible={privacyModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPrivacyModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.privacyModalContent}>
+            <Text style={styles.modalTitle}>Privacidade e Segurança</Text>
+            <Text style={styles.privacyText}>
+              Nós levamos a sua privacidade a sério. Aqui estão algumas informações importantes sobre como seus dados são tratados:
+            </Text>
+            <Text style={styles.privacyText}>
+              - **Coleta de Dados:** Coletamos apenas os dados essenciais para o funcionamento do aplicativo, como seu nome de usuário e informações de login.
+            </Text>
+            <Text style={styles.privacyText}>
+              - **Uso dos Dados:** Seus dados são usados exclusivamente para personalizar sua experiência e garantir a segurança da sua conta. Nunca compartilhamos seus dados com terceiros sem seu consentimento explícito.
+            </Text>
+            <Text style={styles.privacyText}>
+              - **Segurança:** Empregamos medidas de segurança avançadas para proteger suas informações contra acessos não autorizados. Suas senhas são armazenadas de forma criptografada.
+            </Text>
+            <Text style={styles.privacyText}>
+              - **Controle:** Você tem total controle sobre suas informações. Acesse as configurações da sua conta para gerenciar suas preferências de privacidade.
+            </Text>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#A03A5E', marginTop: 20 }]}
+              onPress={() => setPrivacyModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Entendi</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -337,6 +471,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 2,
     borderColor: '#A03A5E',
+  },
+  // NOVO ESTILO: Estilo para o modal de privacidade e segurança
+  privacyModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    padding: 24,
+    width: 360, // ou um valor adequado para o conteúdo
+    alignItems: 'stretch',
+    elevation: 6,
+  },
+  privacyText: {
+    fontSize: 16,
+    color: '#444',
+    marginBottom: 10,
+    lineHeight: 22,
   },
 });
 
