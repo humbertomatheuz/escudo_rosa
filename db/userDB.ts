@@ -10,9 +10,9 @@ type User = {
 };
 
 let db: any = null;
-if (Platform.OS !== 'web') {
-  db = SQLite.openDatabaseSync('users.db');
-}
+// if (Platform.OS !== 'web') {
+//   db = SQLite.openDatabaseSync('users.db');
+// }
 
 export function initDb() {
   if (db) {

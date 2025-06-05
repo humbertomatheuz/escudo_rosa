@@ -13,9 +13,9 @@ export type Denuncia = {
 };
 
 let db: any = null;
-if (Platform.OS !== "web") {
-  db = SQLite.openDatabaseSync("denuncias.db");
-}
+// if (Platform.OS !== "web") {
+//   db = SQLite.openDatabaseSync("denuncias.db");
+// }
 
 export function initDenunciaDb(): void {
   if (db) {
