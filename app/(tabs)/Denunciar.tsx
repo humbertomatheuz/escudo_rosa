@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, Alert, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+  Alert,
+  Animated,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { salvarDenuncia } from '../../db/denunciaDB';
 import { useRouter } from 'expo-router';
+import styles from '@/styles/styles'; 
 
 const motivos = [
   'Ameaça',
@@ -144,98 +154,5 @@ const DenunciarScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'ios' ? 56 : 32,
-    paddingHorizontal: 24,
-  },
-  popup: {
-    position: 'absolute',
-    top: 40,
-    left: 0,
-    right: 0,
-    marginHorizontal: 24,
-    backgroundColor: '#A03A5E',
-    padding: 16,
-    borderRadius: 12,
-    zIndex: 100,
-    alignItems: 'center',
-    elevation: 10,
-  },
-  popupText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#CFCFD1',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 12,
-    backgroundColor: '#fff',
-  },
-  textArea: {
-    height: 120,
-    textAlignVertical: 'top',
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#A03A5E',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 8,
-    backgroundColor: '#fff',
-  },
-  checkboxChecked: {
-    backgroundColor: '#A03A5E',
-    borderColor: '#A03A5E',
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: '#A03A5E',
-    fontWeight: '500',
-  },
-  dropdown: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#CFCFD1',
-    borderRadius: 12,
-    marginBottom: 12,
-    marginTop: -8,
-    zIndex: 10,
-    elevation: 4,
-  },
-  dropdownItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F2F2F2',
-  },
-  button: {
-    marginTop: 'auto',
-    backgroundColor: '#A03A5E',
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 17,
-  },
-});
 
 export default DenunciarScreen;

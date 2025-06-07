@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'reac
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../contexts/UserContext';
 import { registerUser, loginUser } from '../../db/userDB';
+import styles from '@/styles/styles';
 
 const options = [
   {
@@ -75,7 +76,7 @@ const PerfilScreen = () => {
   // Tela para usuário deslogado
   if (!user) {
     return (
-      <View style={styles.container}>
+      <View style={styles.containerPerfil}>
         <Text style={styles.header}>Configurações</Text>
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
@@ -136,7 +137,10 @@ const PerfilScreen = () => {
               {loginError ? <Text style={styles.errorText}>{loginError}</Text> : null}
               <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
                 <TouchableOpacity
-                  style={[styles.modalButton, { backgroundColor: '#fff', borderWidth: 2, borderColor: '#A03A5E' }]}
+                  style={[
+                    styles.modalButton,
+                    { backgroundColor: '#fff', borderWidth: 2, borderColor: '#A03A5E' },
+                  ]}
                   onPress={() => {
                     setLoginVisible(false);
                     setLogin('');
@@ -180,19 +184,26 @@ const PerfilScreen = () => {
             <View style={styles.privacyModalContent}>
               <Text style={styles.modalTitle}>Privacidade e Segurança</Text>
               <Text style={styles.privacyText}>
-                Nós levamos a sua privacidade a sério. Aqui estão algumas informações importantes sobre como seus dados são tratados:
+                Nós levamos a sua privacidade a sério. Aqui estão algumas informações importantes
+                sobre como seus dados são tratados:
               </Text>
               <Text style={styles.privacyText}>
-                - **Coleta de Dados:** Coletamos apenas os dados essenciais para o funcionamento do aplicativo, como seu nome de usuário e informações de login.
+                - **Coleta de Dados:** Coletamos apenas os dados essenciais para o funcionamento do
+                aplicativo, como seu nome de usuário e informações de login.
               </Text>
               <Text style={styles.privacyText}>
-                - **Uso dos Dados:** Seus dados são usados exclusivamente para personalizar sua experiência e garantir a segurança da sua conta. Nunca compartilhamos seus dados com terceiros sem seu consentimento explícito.
+                - **Uso dos Dados:** Seus dados são usados exclusivamente para personalizar sua
+                experiência e garantir a segurança da sua conta. Nunca compartilhamos seus dados com
+                terceiros sem seu consentimento explícito.
               </Text>
               <Text style={styles.privacyText}>
-                - **Segurança:** Empregamos medidas de segurança avançadas para proteger suas informações contra acessos não autorizados. Suas senhas são armazenadas de forma criptografada.
+                - **Segurança:** Empregamos medidas de segurança avançadas para proteger suas
+                informações contra acessos não autorizados. Suas senhas são armazenadas de forma
+                criptografada.
               </Text>
               <Text style={styles.privacyText}>
-                - **Controle:** Você tem total controle sobre suas informações. Acesse as configurações da sua conta para gerenciar suas preferências de privacidade.
+                - **Controle:** Você tem total controle sobre suas informações. Acesse as
+                configurações da sua conta para gerenciar suas preferências de privacidade.
               </Text>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: '#A03A5E', marginTop: 20 }]}
@@ -209,7 +220,7 @@ const PerfilScreen = () => {
 
   // Tela para usuário logado
   return (
-    <View style={styles.container}>
+    <View style={styles.containerPerfil}>
       <Text style={styles.header}>Configurações</Text>
       <View style={styles.avatarContainer}>
         <View style={[styles.avatar, { backgroundColor: user.avatarColor }]}>
@@ -237,10 +248,7 @@ const PerfilScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="#B0B0B0" />
           </TouchableOpacity>
         ))}
-        <TouchableOpacity
-          style={styles.optionRow}
-          onPress={() => setLogoutVisible(true)}
-        >
+        <TouchableOpacity style={styles.optionRow} onPress={() => setLogoutVisible(true)}>
           <Text style={styles.optionText}>Desconectar</Text>
           <Ionicons name="exit-outline" size={20} color="#B0B0B0" />
         </TouchableOpacity>
@@ -257,7 +265,8 @@ const PerfilScreen = () => {
           <View style={styles.logoutModalContent}>
             <Text style={styles.logoutTitle}>Desconectar</Text>
             <Text style={styles.logoutText}>
-              Tem certeza de que deseja sair? Você precisará fazer login novamente para usar o aplicativo.
+              Tem certeza de que deseja sair? Você precisará fazer login novamente para usar o
+              aplicativo.
             </Text>
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
               <TouchableOpacity
@@ -291,19 +300,26 @@ const PerfilScreen = () => {
           <View style={styles.privacyModalContent}>
             <Text style={styles.modalTitle}>Privacidade e Segurança</Text>
             <Text style={styles.privacyText}>
-              Nós levamos a sua privacidade a sério. Aqui estão algumas informações importantes sobre como seus dados são tratados:
+              Nós levamos a sua privacidade a sério. Aqui estão algumas informações importantes
+              sobre como seus dados são tratados:
             </Text>
             <Text style={styles.privacyText}>
-              - **Coleta de Dados:** Coletamos apenas os dados essenciais para o funcionamento do aplicativo, como seu nome de usuário e informações de login.
+              - **Coleta de Dados:** Coletamos apenas os dados essenciais para o funcionamento do
+              aplicativo, como seu nome de usuário e informações de login.
             </Text>
             <Text style={styles.privacyText}>
-              - **Uso dos Dados:** Seus dados são usados exclusivamente para personalizar sua experiência e garantir a segurança da sua conta. Nunca compartilhamos seus dados com terceiros sem seu consentimento explícito.
+              - **Uso dos Dados:** Seus dados são usados exclusivamente para personalizar sua
+              experiência e garantir a segurança da sua conta. Nunca compartilhamos seus dados com
+              terceiros sem seu consentimento explícito.
             </Text>
             <Text style={styles.privacyText}>
-              - **Segurança:** Empregamos medidas de segurança avançadas para proteger suas informações contra acessos não autorizados. Suas senhas são armazenadas de forma criptografada.
+              - **Segurança:** Empregamos medidas de segurança avançadas para proteger suas
+              informações contra acessos não autorizados. Suas senhas são armazenadas de forma
+              criptografada.
             </Text>
             <Text style={styles.privacyText}>
-              - **Controle:** Você tem total controle sobre suas informações. Acesse as configurações da sua conta para gerenciar suas preferências de privacidade.
+              - **Controle:** Você tem total controle sobre suas informações. Acesse as
+              configurações da sua conta para gerenciar suas preferências de privacidade.
             </Text>
             <TouchableOpacity
               style={[styles.modalButton, { backgroundColor: '#A03A5E', marginTop: 20 }]}
@@ -317,176 +333,5 @@ const PerfilScreen = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 48,
-  },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    marginBottom: 24,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#C96A8C',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-    position: 'relative',
-  },
-  editIcon: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    backgroundColor: '#A03A5E',
-    borderRadius: 12,
-    padding: 2,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  name: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  username: {
-    fontSize: 15,
-    color: '#888',
-    marginBottom: 8,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E6E6E6',
-    marginHorizontal: 24,
-    marginVertical: 16,
-  },
-  options: {
-    marginHorizontal: 8,
-  },
-  optionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 16,
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F2F2F2',
-  },
-  optionText: {
-    fontSize: 16,
-    color: '#222',
-  },
-  loginButton: {
-    marginTop: 32,
-    marginHorizontal: 24,
-    backgroundColor: '#A03A5E',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  loginButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: 24,
-    width: 320,
-    alignItems: 'stretch',
-    elevation: 6,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E6E6E6',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-    fontSize: 16,
-    backgroundColor: '#F9F9F9',
-  },
-  errorText: {
-    color: '#A03A5E',
-    fontSize: 14,
-    marginBottom: 4,
-    alignSelf: 'center',
-  },
-  modalButton: {
-    flex: 1,
-    borderRadius: 24,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  logoutModalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: 24,
-    width: 360,
-    alignItems: 'stretch',
-    elevation: 6,
-  },
-  logoutTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    marginBottom: 8,
-  },
-  logoutText: {
-    fontSize: 18,
-    color: '#7A7A7A',
-    textAlign: 'center',
-    marginBottom: 8,
-    marginTop: 4,
-  },
-  cancelButton: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#A03A5E',
-  },
-  // NOVO ESTILO: Estilo para o modal de privacidade e segurança
-  privacyModalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    padding: 24,
-    width: 360, // ou um valor adequado para o conteúdo
-    alignItems: 'stretch',
-    elevation: 6,
-  },
-  privacyText: {
-    fontSize: 16,
-    color: '#444',
-    marginBottom: 10,
-    lineHeight: 22,
-  },
-});
 
 export default PerfilScreen;
