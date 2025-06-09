@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'; 
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,15 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  FlatList, 
-  Alert, 
-  ActivityIndicator, 
-  ScrollView, 
+  FlatList,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../contexts/UserContext';
 import { registerUser, loginUser } from '../../services/users';
-import { listarDenuncias, Denuncia } from '../../services/denuncias'; 
+import { listarDenuncias, Denuncia } from '../../services/denuncias';
 import styles from '@/styles/styles';
 
 const options = [
@@ -25,13 +25,11 @@ const options = [
   },
 ];
 
-
 type DenunciaModalItem = Denuncia | null;
 
 const PerfilScreen = () => {
   const { user, setUser } = useUser();
 
-  
   const [loginVisible, setLoginVisible] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [login, setLogin] = useState('');
@@ -45,40 +43,46 @@ const PerfilScreen = () => {
 
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
   const [loadingDenuncias, setLoadingDenuncias] = useState(false);
-  const [denunciasExpanded, setDenunciasExpanded] = useState(false); 
-  const [denunciaModalVisible, setDenunciaModalVisible] = useState(false); 
-  const [selectedDenuncia, setSelectedDenuncia] = useState<DenunciaModalItem>(null); 
+  const [denunciasExpanded, setDenunciasExpanded] = useState(false);
+  const [denunciaModalVisible, setDenunciaModalVisible] = useState(false);
+  const [selectedDenuncia, setSelectedDenuncia] = useState<DenunciaModalItem>(null);
 
   const [isGestor, setIsGestor] = useState(false);
 
   useEffect(() => {
     if (user && user.cargo === 'admin') {
-        setIsGestor(true);
+      setIsGestor(true);
     } else {
-        setIsGestor(false);
+      setIsGestor(false);
     }
-  }, [user]); 
+  }, [user]);
 
+  // Função para carregar as denúncias
+  const fetchDenuncias = useCallback(async () => {
+    if (!user || user.cargo !== 'admin' || loadingDenuncias) {
+      return; // Apenas gestores podem carregar e evita múltiplas chamadas
+    }
+
+    setLoadingDenuncias(true);
+    try {
+      const fetchedDenuncias = await listarDenuncias();
+      setDenuncias(fetchedDenuncias);
+    } catch (error) {
+      console.error('Erro ao carregar denúncias:', error);
+      Alert.alert('Erro', 'Não foi possível carregar as denúncias.');
+    } finally {
+      setLoadingDenuncias(false);
+    }
+  }, [user, loadingDenuncias]); // Dependências do useCallback: user e loadingDenuncias
+
+  // useEffect para carregar denúncias quando a seção é expandida e é gestor
+  // e ainda não há denúncias carregadas.
   useEffect(() => {
-    if (isGestor && denunciasExpanded && denuncias.length === 0 && !loadingDenuncias) {
-      const fetchDenuncias = async () => {
-        setLoadingDenuncias(true);
-        try {
-          const fetchedDenuncias = await listarDenuncias();
-          setDenuncias(fetchedDenuncias);
-        } catch (error) {
-          console.error('Erro ao carregar denúncias:', error);
-          Alert.alert('Erro', 'Não foi possível carregar as denúncias.');
-        } finally {
-          setLoadingDenuncias(false);
-        }
-      };
+    if (isGestor && denunciasExpanded && denuncias.length === 0) {
       fetchDenuncias();
     }
-  }, [isGestor, denunciasExpanded, denuncias.length, loadingDenuncias]);
+  }, [isGestor, denunciasExpanded, denuncias.length, fetchDenuncias]); // Adicione fetchDenuncias como dependência
 
-
-  
   const handleLogin = async () => {
     try {
       const userDb = await loginUser(login, senha);
@@ -93,6 +97,7 @@ const PerfilScreen = () => {
         setSenha('');
         setNome('');
         setLoginError('');
+        setLoginVisible(false); // Fechar modal após login
       } else {
         setLoginError('Usuário ou senha inválidos');
       }
@@ -101,7 +106,6 @@ const PerfilScreen = () => {
     }
   };
 
-  
   const handleRegister = async () => {
     if (!login || !senha || !nome) {
       setLoginError('Preencha todos os campos');
@@ -121,7 +125,6 @@ const PerfilScreen = () => {
     }
   };
 
-  
   const openDenunciaModal = (denuncia: Denuncia) => {
     setSelectedDenuncia(denuncia);
     setDenunciaModalVisible(true);
@@ -132,13 +135,9 @@ const PerfilScreen = () => {
     setSelectedDenuncia(null);
   };
 
-  
-  const renderDenunciaCard = ({ item, index }: { item: Denuncia, index: number }) => (
+  const renderDenunciaCard = ({ item, index }: { item: Denuncia; index: number }) => (
     <TouchableOpacity
-      style={[
-        styles.itemCard, 
-        index === denuncias.length - 1 && styles.lastItemCard, 
-      ]}
+      style={[styles.itemCard, index === denuncias.length - 1 && styles.lastItemCard]}
       onPress={() => openDenunciaModal(item)}
     >
       <View style={styles.itemInfo}>
@@ -146,16 +145,10 @@ const PerfilScreen = () => {
         {item.nome && <Text style={styles.itemLocation}>Denunciante: {item.nome}</Text>}
         {!item.identificar && <Text style={styles.itemLocation}>(Anônimo)</Text>}
       </View>
-      <Ionicons
-        name="chevron-forward-outline"
-        size={24}
-        color="#CFCFD1"
-        style={styles.itemArrow}
-      />
+      <Ionicons name="chevron-forward-outline" size={24} color="#CFCFD1" style={styles.itemArrow} />
     </TouchableOpacity>
   );
 
-  
   if (!user) {
     return (
       <View style={styles.containerPerfil}>
@@ -203,6 +196,7 @@ const PerfilScreen = () => {
                 />
               )}
               <TextInput
+                placeholderTextColor={'#888'}
                 style={styles.input}
                 placeholder="Usuário"
                 autoCapitalize="none"
@@ -210,6 +204,7 @@ const PerfilScreen = () => {
                 onChangeText={setLogin}
               />
               <TextInput
+                placeholderTextColor={'#888'}
                 style={styles.input}
                 placeholder="Senha"
                 secureTextEntry
@@ -255,7 +250,6 @@ const PerfilScreen = () => {
           </View>
         </Modal>
 
-        {/* Modal de Privacidade e Segurança (EXISTENTE) */}
         <Modal
           visible={privacyModalVisible}
           transparent
@@ -288,10 +282,10 @@ const PerfilScreen = () => {
                 configurações da sua conta para gerenciar suas preferências de privacidade.
               </Text>
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: '#A03A5E', marginTop: 20 }]}
+                style={styles.closeModalButton}
                 onPress={() => setPrivacyModalVisible(false)}
               >
-                <Text style={styles.modalButtonText}>Entendi</Text>
+                <Text style={styles.closeModalButtonText}>Fechar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -331,7 +325,17 @@ const PerfilScreen = () => {
           <View>
             <TouchableOpacity
               style={styles.optionRow}
-              onPress={() => setDenunciasExpanded(!denunciasExpanded)}
+              onPress={() => {
+                const newState = !denunciasExpanded;
+                setDenunciasExpanded(newState);
+                // Se expandir, força o carregamento das denúncias
+                if (newState) {
+                  fetchDenuncias();
+                } else {
+                  // Opcional: Se recolher, você pode limpar a lista para forçar um novo carregamento na próxima vez
+                  setDenuncias([]);
+                }
+              }}
             >
               <Text style={styles.optionText}>Denúncias</Text>
               <Ionicons
@@ -350,7 +354,7 @@ const PerfilScreen = () => {
                     data={denuncias}
                     renderItem={renderDenunciaCard}
                     keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
-                    scrollEnabled={false} 
+                    scrollEnabled={false}
                   />
                 ) : (
                   <Text style={styles.noDenunciasText}>Nenhuma denúncia encontrada.</Text>
@@ -393,6 +397,8 @@ const PerfilScreen = () => {
                   setUser(null);
                   setLogoutVisible(false);
                   setIsGestor(false);
+                  setDenuncias([]); // Limpa as denúncias ao desconectar
+                  setDenunciasExpanded(false); // Fecha a seção de denúncias
                 }}
               >
                 <Text style={styles.modalButtonText}>Desconectar</Text>
@@ -435,10 +441,10 @@ const PerfilScreen = () => {
               configurações da sua conta para gerenciar suas preferências de privacidade.
             </Text>
             <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: '#A03A5E', marginTop: 20 }]}
+              style={styles.closeModalButton}
               onPress={() => setPrivacyModalVisible(false)}
             >
-              <Text style={styles.modalButtonText}>Entendi</Text>
+              <Text style={styles.closeModalButtonText}>Fechar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -467,12 +473,13 @@ const PerfilScreen = () => {
 
                 <Text style={styles.modalLabel}>Identificação:</Text>
                 <Text style={styles.modalText}>
-                  {selectedDenuncia.identificar ? (selectedDenuncia.nome || 'Identificado') : 'Anônimo'}
+                  {selectedDenuncia.identificar
+                    ? selectedDenuncia.nome || 'Identificado'
+                    : 'Anônimo'}
                 </Text>
                 {selectedDenuncia.identificar && selectedDenuncia.nome && (
-                    <Text style={styles.modalTextDetail}>(Nome: {selectedDenuncia.nome})</Text>
+                  <Text style={styles.modalTextDetail}>(Nome: {selectedDenuncia.nome})</Text>
                 )}
-
 
                 <Text style={styles.modalLabel}>Data da Denúncia:</Text>
                 <Text style={styles.modalText}>
@@ -482,10 +489,7 @@ const PerfilScreen = () => {
             ) : (
               <Text>Nenhuma denúncia selecionada.</Text>
             )}
-            <TouchableOpacity
-              style={styles.closeModalButton}
-              onPress={closeDenunciaModal}
-            >
+            <TouchableOpacity style={styles.closeModalButton} onPress={closeDenunciaModal}>
               <Text style={styles.closeModalButtonText}>Fechar</Text>
             </TouchableOpacity>
           </View>
