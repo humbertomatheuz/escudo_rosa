@@ -1,15 +1,13 @@
-import api from './api'; // Importe o arquivo de configuração da API
+import api from './api';
 
 export type Eventos = {
   id?: number;
   title: string;
   descricao: string;
   local?: string;
-  created_at: number; // Timestamp em milissegundos
+  data?: string;
+  created_at: number; 
 };
-
-// Não é mais necessário inicializar banco de dados SQLite aqui
-// export function initDb() { /* Remova ou comente */ }
 
 export async function listarEventos(): Promise<Eventos[]> {
   try {

@@ -1,60 +1,51 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+        tabBarActiveTintColor: '#A03A5E',
+        tabBarInactiveTintColor: '#B0B0B0',
         tabBarStyle: {
-          backgroundColor: '#fff', // fundo branco
-          borderTopWidth: 0.5,
-          borderTopColor: '#eee',
-          height: 60,
+          backgroundColor: '#ffffff',
+          borderTopWidth: 0,
+          elevation: 5,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
         },
+        headerShown: false,
       }}
     >
       <Tabs.Screen
-        name="feed"
+        name="index"
         options={{
           title: 'Feed',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="doc.text" color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home-outline" size={24} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="denunciar"
+        name="Denunciar"
         options={{
           title: 'Denunciar',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="exclamationmark.triangle.fill" color={color} />
+            <MaterialCommunityIcons name="alert-outline" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="perfil"
+        name="Perfil"
         options={{
           title: 'Perfil',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol
-              size={28}
-              name="person.fill" // Ícone de pessoa
-              color={color}
-            />
-          ),
+          tabBarIcon: ({ color }) => <Ionicons name="person-outline" size={24} color={color} />,
         }}
       />
+      {/* Se você tiver outras telas na pasta (tabs) que NÃO devem ser abas,
+          você pode usar <Tabs.Screen name="nome-do-arquivo" options={{ href: null }} /> */}
     </Tabs>
   );
 }

@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState } from 'react';
 type User = {
   name: string;
   username: string;
-  avatarColor: string;
+  cargo: string;
 } | null;
 
 type UserContextType = {
@@ -14,7 +14,7 @@ type UserContextType = {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User>(null); // começa deslogado
+  const [user, setUser] = useState<User>(null); 
 
   return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
 };

@@ -1,4 +1,6 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -173,23 +175,60 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
     backgroundColor: '#fff',
     borderRadius: 24,
     padding: 24,
-    width: 320,
+    width: width * 0.9,
+    maxHeight: '80%',
     alignItems: 'stretch',
     elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     alignSelf: 'center',
     marginBottom: 16,
+    color: '#333',
+  },
+  modalDescription: {
+    marginBottom: 10,
+    textAlign: 'justify',
+    fontSize: 16,
+    color: '#555',
+  },
+  modalLocation: {
+    marginBottom: 5,
+    fontSize: 14,
+    color: '#777',
+    fontStyle: 'italic',
+  },
+  modalDate: {
+    marginTop: 10,
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'right',
+  },
+  closeModalButton: {
+    backgroundColor: '#A03A5E',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 20,
+    width: '100%',
+  },
+  closeModalButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   errorText: {
     color: '#A03A5E',
@@ -250,8 +289,15 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   feedCardSection: {
-    marginTop: 24,
-    marginBottom: 16,
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   feedCardHeader: {
     flexDirection: 'row',
@@ -273,47 +319,94 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 16,
   },
-  contactCard: {
+  itemCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8F8F8',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3.84,
-    elevation: 2,
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F2F2',
   },
-  contactCardImagePlaceholder: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: '#E0BBE4',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+
+  lastItemCard: {
+    borderBottomWidth: 0,
   },
-  contactCardImagePlaceholderIcon: {
-    color: '#A03A5E',
-  },
-  contactInfo: {
+  itemInfo: {
     flex: 1,
+    marginRight: 10,
   },
-  contactName: {
-    fontSize: 18,
+  itemTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
   },
-  contactLocation: {
+  itemLocation: {
     fontSize: 14,
     color: '#666',
+    marginTop: 2,
   },
-  contactArrow: {
+  itemArrow: {
     marginLeft: 16,
   },
-});
 
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+
+  modalView: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    maxHeight: '80%',
+    width: width * 0.9,
+  },
+
+  modalLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 10,
+    marginBottom: 2,
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#555',
+    marginBottom: 5,
+    textAlign: 'justify',
+  },
+  modalTextDetail: {
+    fontSize: 14,
+    color: '#777',
+    fontStyle: 'italic',
+    marginBottom: 5,
+  },
+
+  denunciasListContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginTop: 10,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  noDenunciasText: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+    color: '#888',
+    paddingVertical: 15,
+  },
+});
 
 export default styles;

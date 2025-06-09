@@ -4,7 +4,7 @@ export type User = {
   username: string;
   password: string;
   name: string;
-  avatarColor: string;
+  cargo: string;
 };
 
 // Não é mais necessário inicializar banco de dados SQLite aqui
@@ -25,6 +25,8 @@ export async function registerUser(user: User): Promise<User | null> {
 export async function loginUser(username: string, password: string): Promise<User | null> {
   try {
     const response = await api.post('/login', { username, password });
+    console.log(response);
+    
     // A API retorna o usuário logado (sem a senha)
     return response.data;
   } catch (error: any) {

@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react'; 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  FlatList, 
+  Alert, 
+  ActivityIndicator, 
+  ScrollView, 
+} from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../../contexts/UserContext';
-import { registerUser, loginUser } from '../../db/userDB';
+import { registerUser, loginUser } from '../../services/users';
+import { listarDenuncias, Denuncia } from '../../services/denuncias'; 
 import styles from '@/styles/styles';
 
 const options = [
@@ -13,10 +25,13 @@ const options = [
   },
 ];
 
+
+type DenunciaModalItem = Denuncia | null;
+
 const PerfilScreen = () => {
   const { user, setUser } = useUser();
 
-  // Estados para modal de login/cadastro
+  
   const [loginVisible, setLoginVisible] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [login, setLogin] = useState('');
@@ -24,13 +39,46 @@ const PerfilScreen = () => {
   const [nome, setNome] = useState('');
   const [loginError, setLoginError] = useState('');
 
-  // Estado para modal de desconectar
   const [logoutVisible, setLogoutVisible] = useState(false);
 
-  // NOVO ESTADO: Estado para modal de privacidade e segurança
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
 
-  // Função de login
+  const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
+  const [loadingDenuncias, setLoadingDenuncias] = useState(false);
+  const [denunciasExpanded, setDenunciasExpanded] = useState(false); 
+  const [denunciaModalVisible, setDenunciaModalVisible] = useState(false); 
+  const [selectedDenuncia, setSelectedDenuncia] = useState<DenunciaModalItem>(null); 
+
+  const [isGestor, setIsGestor] = useState(false);
+
+  useEffect(() => {
+    if (user && user.cargo === 'admin') {
+        setIsGestor(true);
+    } else {
+        setIsGestor(false);
+    }
+  }, [user]); 
+
+  useEffect(() => {
+    if (isGestor && denunciasExpanded && denuncias.length === 0 && !loadingDenuncias) {
+      const fetchDenuncias = async () => {
+        setLoadingDenuncias(true);
+        try {
+          const fetchedDenuncias = await listarDenuncias();
+          setDenuncias(fetchedDenuncias);
+        } catch (error) {
+          console.error('Erro ao carregar denúncias:', error);
+          Alert.alert('Erro', 'Não foi possível carregar as denúncias.');
+        } finally {
+          setLoadingDenuncias(false);
+        }
+      };
+      fetchDenuncias();
+    }
+  }, [isGestor, denunciasExpanded, denuncias.length, loadingDenuncias]);
+
+
+  
   const handleLogin = async () => {
     try {
       const userDb = await loginUser(login, senha);
@@ -38,9 +86,9 @@ const PerfilScreen = () => {
         setUser({
           name: userDb.name,
           username: userDb.username,
-          avatarColor: userDb.avatarColor,
+          cargo: userDb.cargo,
         });
-        setLoginVisible(false);
+        setIsGestor(userDb.cargo === 'admin');
         setLogin('');
         setSenha('');
         setNome('');
@@ -53,7 +101,7 @@ const PerfilScreen = () => {
     }
   };
 
-  // Função de cadastro
+  
   const handleRegister = async () => {
     if (!login || !senha || !nome) {
       setLoginError('Preencha todos os campos');
@@ -64,7 +112,7 @@ const PerfilScreen = () => {
         username: login,
         password: senha,
         name: nome,
-        avatarColor: '#C96A8C',
+        cargo: 'user',
       });
       setLoginError('Cadastro realizado! Faça login.');
       setIsRegister(false);
@@ -73,7 +121,41 @@ const PerfilScreen = () => {
     }
   };
 
-  // Tela para usuário deslogado
+  
+  const openDenunciaModal = (denuncia: Denuncia) => {
+    setSelectedDenuncia(denuncia);
+    setDenunciaModalVisible(true);
+  };
+
+  const closeDenunciaModal = () => {
+    setDenunciaModalVisible(false);
+    setSelectedDenuncia(null);
+  };
+
+  
+  const renderDenunciaCard = ({ item, index }: { item: Denuncia, index: number }) => (
+    <TouchableOpacity
+      style={[
+        styles.itemCard, 
+        index === denuncias.length - 1 && styles.lastItemCard, 
+      ]}
+      onPress={() => openDenunciaModal(item)}
+    >
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemTitle}>Motivo: {item.motivo}</Text>
+        {item.nome && <Text style={styles.itemLocation}>Denunciante: {item.nome}</Text>}
+        {!item.identificar && <Text style={styles.itemLocation}>(Anônimo)</Text>}
+      </View>
+      <Ionicons
+        name="chevron-forward-outline"
+        size={24}
+        color="#CFCFD1"
+        style={styles.itemArrow}
+      />
+    </TouchableOpacity>
+  );
+
+  
   if (!user) {
     return (
       <View style={styles.containerPerfil}>
@@ -102,7 +184,7 @@ const PerfilScreen = () => {
           <Text style={styles.loginButtonText}>Conectar ou registrar-se</Text>
         </TouchableOpacity>
 
-        {/* Modal de Login/Cadastro */}
+        {/* Modal de Login/Cadastro (EXISTENTE) */}
         <Modal
           visible={loginVisible}
           transparent
@@ -173,7 +255,7 @@ const PerfilScreen = () => {
           </View>
         </Modal>
 
-        {/* NOVO MODAL: Privacidade e Segurança para usuário deslogado */}
+        {/* Modal de Privacidade e Segurança (EXISTENTE) */}
         <Modal
           visible={privacyModalVisible}
           transparent
@@ -218,16 +300,12 @@ const PerfilScreen = () => {
     );
   }
 
-  // Tela para usuário logado
   return (
     <View style={styles.containerPerfil}>
       <Text style={styles.header}>Configurações</Text>
       <View style={styles.avatarContainer}>
-        <View style={[styles.avatar, { backgroundColor: user.avatarColor }]}>
+        <View style={[styles.avatar, { backgroundColor: '#C4C4C4' }]}>
           <Ionicons name="person" size={64} color="#fff" />
-          <TouchableOpacity style={styles.editIcon}>
-            <MaterialIcons name="edit" size={18} color="#fff" />
-          </TouchableOpacity>
         </View>
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.username}>{user.username}</Text>
@@ -248,13 +326,47 @@ const PerfilScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="#B0B0B0" />
           </TouchableOpacity>
         ))}
+
+        {isGestor && (
+          <View>
+            <TouchableOpacity
+              style={styles.optionRow}
+              onPress={() => setDenunciasExpanded(!denunciasExpanded)}
+            >
+              <Text style={styles.optionText}>Denúncias</Text>
+              <Ionicons
+                name={denunciasExpanded ? 'chevron-down' : 'chevron-forward'}
+                size={20}
+                color="#B0B0B0"
+              />
+            </TouchableOpacity>
+
+            {denunciasExpanded && (
+              <View style={styles.denunciasListContainer}>
+                {loadingDenuncias ? (
+                  <ActivityIndicator size="small" color="#A03A5E" style={{ marginVertical: 10 }} />
+                ) : denuncias.length > 0 ? (
+                  <FlatList
+                    data={denuncias}
+                    renderItem={renderDenunciaCard}
+                    keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+                    scrollEnabled={false} 
+                  />
+                ) : (
+                  <Text style={styles.noDenunciasText}>Nenhuma denúncia encontrada.</Text>
+                )}
+              </View>
+            )}
+          </View>
+        )}
+
         <TouchableOpacity style={styles.optionRow} onPress={() => setLogoutVisible(true)}>
           <Text style={styles.optionText}>Desconectar</Text>
           <Ionicons name="exit-outline" size={20} color="#B0B0B0" />
         </TouchableOpacity>
       </View>
 
-      {/* Modal de Desconectar */}
+      {/* Modal de Desconectar (EXISTENTE) */}
       <Modal
         visible={logoutVisible}
         transparent
@@ -280,6 +392,7 @@ const PerfilScreen = () => {
                 onPress={() => {
                   setUser(null);
                   setLogoutVisible(false);
+                  setIsGestor(false);
                 }}
               >
                 <Text style={styles.modalButtonText}>Desconectar</Text>
@@ -289,7 +402,7 @@ const PerfilScreen = () => {
         </View>
       </Modal>
 
-      {/* NOVO MODAL: Privacidade e Segurança para usuário logado */}
+      {/* Modal de Privacidade e Segurança (EXISTENTE) */}
       <Modal
         visible={privacyModalVisible}
         transparent
@@ -326,6 +439,54 @@ const PerfilScreen = () => {
               onPress={() => setPrivacyModalVisible(false)}
             >
               <Text style={styles.modalButtonText}>Entendi</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* NOVO MODAL: Detalhes da Denúncia */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={denunciaModalVisible}
+        onRequestClose={closeDenunciaModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedDenuncia ? (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <Text style={styles.modalTitle}>Detalhes da Denúncia</Text>
+                <Text style={styles.modalLabel}>Motivo:</Text>
+                <Text style={styles.modalText}>{selectedDenuncia.motivo}</Text>
+
+                <Text style={styles.modalLabel}>Descrição:</Text>
+                <Text style={styles.modalText}>{selectedDenuncia.descricao}</Text>
+
+                <Text style={styles.modalLabel}>Agressor:</Text>
+                <Text style={styles.modalText}>{selectedDenuncia.agressor || 'Não informado'}</Text>
+
+                <Text style={styles.modalLabel}>Identificação:</Text>
+                <Text style={styles.modalText}>
+                  {selectedDenuncia.identificar ? (selectedDenuncia.nome || 'Identificado') : 'Anônimo'}
+                </Text>
+                {selectedDenuncia.identificar && selectedDenuncia.nome && (
+                    <Text style={styles.modalTextDetail}>(Nome: {selectedDenuncia.nome})</Text>
+                )}
+
+
+                <Text style={styles.modalLabel}>Data da Denúncia:</Text>
+                <Text style={styles.modalText}>
+                  {new Date(selectedDenuncia.createdAt).toLocaleDateString('pt-BR')}
+                </Text>
+              </ScrollView>
+            ) : (
+              <Text>Nenhuma denúncia selecionada.</Text>
+            )}
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={closeDenunciaModal}
+            >
+              <Text style={styles.closeModalButtonText}>Fechar</Text>
             </TouchableOpacity>
           </View>
         </View>

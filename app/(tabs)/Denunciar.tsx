@@ -10,9 +10,9 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { salvarDenuncia } from '../../db/denunciaDB';
+import { salvarDenuncia } from '../../services/denuncias';
 import { useRouter } from 'expo-router';
-import styles from '@/styles/styles'; 
+import styles from '@/styles/styles';
 
 const motivos = [
   'Ameaça',
@@ -48,6 +48,9 @@ const DenunciarScreen = () => {
         createdAt: new Date().toISOString(),
       });
       setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
+      }, 2000);
       setNome('');
       setMotivo('');
       setDescricao('');
@@ -60,23 +63,15 @@ const DenunciarScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Popup de confirmação */}
       {showPopup && (
         <View style={styles.popup}>
           <Text style={styles.popupText}>Denúncia enviada com sucesso!</Text>
         </View>
       )}
 
-      {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-        <TouchableOpacity>
-          <Ionicons name="chevron-back" size={28} color="#222" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Nome */}
       {identificar && (
         <TextInput
+          placeholderTextColor="#888"
           style={styles.input}
           placeholder="Digite seu nome"
           value={nome}
@@ -102,7 +97,7 @@ const DenunciarScreen = () => {
         onPress={() => setMotivoDropdown(!motivoDropdown)}
         activeOpacity={0.8}
       >
-        <Text style={{ color: motivo ? '#222' : '#B0B0B0', fontSize: 16 }}>
+        <Text style={{ color: motivo ? '#000' : '#888', fontSize: 16 }}>
           {motivo || 'Motivo da denúncia *'}
         </Text>
         <Ionicons
@@ -131,6 +126,7 @@ const DenunciarScreen = () => {
 
       {/* Descrição */}
       <TextInput
+        placeholderTextColor="#888"
         style={[styles.input, styles.textArea]}
         placeholder="Descrição *"
         value={descricao}
@@ -141,6 +137,7 @@ const DenunciarScreen = () => {
 
       {/* Identificação agressor */}
       <TextInput
+        placeholderTextColor="#888"
         style={styles.input}
         placeholder="Identificação agressor"
         value={agressor}

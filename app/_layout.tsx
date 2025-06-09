@@ -8,7 +8,6 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { UserProvider } from '../contexts/UserContext';
-import { initDb } from '../db/userDB'; // ADICIONE ESTA LINHA
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,7 +18,6 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    initDb(); // INICIALIZA O BANCO
     if (loaded) {
       SplashScreen.hideAsync();
     }
